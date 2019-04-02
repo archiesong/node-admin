@@ -5,8 +5,8 @@ const router = express.Router();
 const userCtrl = require('../controller/userCtrl.js');
 const authMiddleware = require('../utils/auth-Middleware.js'); //验证token 中间件
   router
-  .post('/login',userCtrl.login) //登录
-  .get('/info',authMiddleware, userCtrl.getUserInfo) //获取用户信息
+  .post('/auth/login',userCtrl.login) //登录
+  .get('/auth/info',authMiddleware, userCtrl.getUserInfo) //获取用户信息
   .post('/users/list', authMiddleware,userCtrl.getUsersList)  //获取用户列表
 
 module.exports = router;

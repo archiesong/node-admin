@@ -4,6 +4,6 @@ const router = express.Router();
 const menuCtrl = require('../controller/menuCtrl.js');
 const authMiddleware = require('../utils/auth-Middleware.js'); //验证token 中间件
 router
-.post('/menus',authMiddleware, menuCtrl.getMenuTree) //获取前端菜单路由
+.post('/menus/build',authMiddleware, menuCtrl.getMenuTree) //获取前端菜单路由
 
 module.exports = router;

@@ -16,19 +16,19 @@ module.exports = {
         console.log(password)
         userModel.findUserByUsername(userName, (err, results) => {
             if (err || results.length < 1) {
-                entries.code = 1;
+                entries.code = 303;
                 entries.msg = "用户名不存在！";
                 entries.data = "";
                 return res.json(entries)
             }
             if (results[0].password != password) {
-                entries.code = 1;
+                entries.code = 303;
                 entries.msg = '密码错误！';
                 entries.data = "";
                 return res.json(entries)
             }
             if (!results[0].enabled) {
-                entries.code = 1;
+                entries.code = 303;
                 entries.msg = "账号已停用，请联系管理员！";
                 entries.data = "";
                 return res.json(entries)
@@ -39,7 +39,7 @@ module.exports = {
             //创建 token
             let jwt = new JwtUtil(results[0]);
             let access_token = jwt.generateToken();
-            entries.code = 0;
+            entries.code = 200;
             entries.msg = "验证成功!";
             entries.data = {
                 token: access_token
@@ -52,7 +52,7 @@ module.exports = {
             var uid = req.user.id;
             userModel.findRoleByUserId(uid, (err, results) => {
                 if (err || results.length < 1) {
-                    entries.code = 1;
+                    entries.code = 303;
                     entries.msg = "获取用户信息失败，请稍后再试！";
                     entries.data = "";
                     return res.json(entries)
@@ -71,7 +71,7 @@ module.exports = {
                         name: item.name
                     });
                 });
-                entries.code = 0;
+                entries.code = 200;
                 entries.msg = "获取用户信息成功！";
                 entries.data = data;
                 return res.json(entries)
@@ -79,6 +79,38 @@ module.exports = {
         }
     },
     getUsersList(req, res) {
-        console.log(req)
+        var params = req.body;
+        var pageSize = req.body.pageSize;
+        var pageNo = ( req.body.pageNo - 1) * pageSize; //偏移数
+        // var 
+         userModel.findAllUsers(params,(err, results)=>{
+            if (err || results.length < 1) {
+                entries.code = 303;
+                entries.msg = "获取列表失败!";
+                entries.data = {};
+                return res.json(entries)
+            }
+            var totalCount = results[1][0]['COUNT(*)']; //总条数
+            var totalPage = parseInt(totalCount) / pageSize; //总页数
+            var pageStr = totalPage.toString();
+            // 不能被整除
+            if (pageStr.indexOf('.') > 0) {
+                totalPage = parseInt(pageStr.split('.')[0]) + 1;
+            }
+            var listData = results[0];
+            for (let i = 0; i < listData.length; i++) {
+                listData[i].timestamp = moment(listData[i].timestamp).format('YYYY-MM-DD HH:mm:ss');
+            }
+            entries.code = 200;
+            entries.data = new Object();
+            entries.data.pageNo = parseInt(pageNo);
+            entries.data.pageSize = parseInt(pageSize);
+            entries.data.totalPage = totalPage;
+            entries.data.totalCount = totalCount;
+            entries.data.articleList = listData;
+            entries.msg = "获取列表成功";
+            return res.json(entries)
+        })
+     
     }
 }

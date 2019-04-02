@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
             const  result = jwt.verifyToken(); 
             if (result == 'err') {
                 return res.json({
-                    code:403,
+                    code:401,
                     msg:'token已过期,请重新登录'
                 })
             }else{
@@ -21,7 +21,7 @@ module.exports = (req, res, next) => {
         }
     } else {
        return res.json({
-           code:10100,
+           code:407,
            msg:'请求未带token,认证失败!'
        })
     }

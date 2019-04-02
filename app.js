@@ -28,7 +28,7 @@ fs.readdir(path.join(__dirname,'./router'),(err,filenames) => {
             // 通过 path.join 方法，拼接每一个 路由模块的 绝对路径
             var filePath = path.join(__dirname, './router',filename);
             // 使用 app.use() 注册每一个路由模块
-            app.use(require(filePath));
+            app.use('/api',require(filePath));
       });
 });
 app.use(express.static('./atatic')); //静态一个文件夹，实用的好处这里的文件的路径就可以 用  /   表示

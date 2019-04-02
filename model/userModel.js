@@ -33,9 +33,9 @@ module.exports = {
                 var data = JSON.parse(dataString).map(item => {
                     const roles = {
                         role_id: item.role_id1_13_0_,
-                        permission_id:item.permissi2_13_0_,
+                        permission_id: item.permissi2_13_0_,
                         id: item.id1_5_1_,
-                        alias:item.alias2_5_1_,
+                        alias: item.alias2_5_1_,
                         create_time: moment(item.create_t3_5_1_).format('YYYY-MM-DD hh:mm:ss'),
                         name: item.name4_5_1_,
                         pid: item.pid5_5_1_
@@ -44,6 +44,69 @@ module.exports = {
                 })
                 callback(null, data);
             })
+        })
+    },
+    findAllUsers(params, callback) {
+        var pageSize = params.pageSize;
+        var pageNo = (params.pageNo - 1) * pageSize; //偏移数
+        var enabled = params.enabled;
+        var sort = params.sort;
+        var username = params.username;
+        var email = params.email;
+        var sqlStr, queryParam = [];
+        if (username) { //使用姓名查询用户列表
+            sqlStr = `SELECT 
+           user0_.id AS id1_14_,
+           user0_.avatar AS avatar2_14_, 
+           user0_.create_time AS create_t3_14_,
+           user0_.email AS email4_14_, 
+           user0_.enabled AS enabled5_14_, 
+           user0_.last_password_reset_time AS last_pas6_14_, 
+           user0_.password AS password7_14_, 
+           user0_.username AS username8_14_
+           FROM user user0_
+             WHERE user0_.username LIKE ?
+               ORDER BY user0_.id DESC
+            LIMIT ?;SELECT COUNT(*) FROM  user user0_  WHERE user0_.username LIKE ?`;
+        } else if (username && enabled) { //使用姓名和账号是否启用或禁用查询用户列表
+            sqlStr = `SELECT user0_.id AS id1_14_, user0_.avatar AS avatar2_14_, user0_.create_time AS create_t3_14_, user0_.email AS email4_14_, user0_.enabled AS enabled5_14_
+           , user0_.last_password_reset_time AS last_pas6_14_, user0_.password AS password7_14_, user0_.username AS username8_14_
+       FROM user user0_
+       WHERE user0_.enabled = ?
+           AND user0_.username LIKE ?
+       ORDER BY user0_.id DESC;SELECT COUNT(*) FROM  user user0_  WHERE user0_.enabled = ? AND user0_.username LIKE ?`;
+        } else if (enabled) { //使用账号是否启用或禁用查询用户列表
+            sqlStr = `SELECT user0_.id AS id1_14_, user0_.avatar AS avatar2_14_, user0_.create_time AS create_t3_14_, user0_.email AS email4_14_, user0_.enabled AS enabled5_14_
+        ,user0_.last_password_reset_time AS last_pas6_14_, user0_.password AS password7_14_, user0_.username AS username8_14_
+    FROM user user0_
+    WHERE user0_.enabled = ?
+    ORDER BY user0_.id DESC
+    LIMIT ?;SELECT COUNT(*) FROM  user user0_  WHERE user0_.enabled = ?`;
+        } else if (enabled && email) { //使用账号是否启用或禁用和用户email来查询用户列表
+            sqlStr = `SELECT user0_.id AS id1_14_, user0_.avatar AS avatar2_14_, user0_.create_time AS create_t3_14_, user0_.email AS email4_14_, user0_.enabled AS enabled5_14_
+        , user0_.last_password_reset_time AS last_pas6_14_, user0_.password AS password7_14_, user0_.username AS username8_14_
+    FROM user user0_
+    WHERE user0_.enabled = ?
+        AND user0_.email LIKE ?
+    ORDER BY user0_.id DESC
+    LIMIT ?;SELECT COUNT(*) FROM  user user0_  WHERE  user0_.enabled = ? AND user0_.email LIKE ?`;
+        } else if (email) { //使用用户email来查询用户列表
+            sqlStr = `SELECT user0_.id AS id1_14_, user0_.avatar AS avatar2_14_, user0_.create_time AS create_t3_14_, user0_.email AS email4_14_, user0_.enabled AS enabled5_14_
+         , user0_.last_password_reset_time AS last_pas6_14_, user0_.password AS password7_14_, user0_.username AS username8_14_
+     FROM user user0_
+     WHERE user0_.email LIKE ?
+     ORDER BY user0_.id DESC
+     LIMIT ?;SELECT COUNT(*) FROM  user user0_  WHERE user0_.email LIKE ?`
+        } else { //模糊查询用户列表
+            sqlStr = `SELECT user0_.id AS id1_14_, user0_.avatar AS avatar2_14_, user0_.create_time AS create_t3_14_, user0_.email AS email4_14_, user0_.enabled AS enabled5_14_
+            , user0_.last_password_reset_time AS last_pas6_14_, user0_.password AS password7_14_, user0_.username AS username8_14_
+        FROM user user0_
+        WHERE 1 = 1
+        ORDER BY user0_.id DESC
+        LIMIT ?;SELECT COUNT(*) FROM  user user0_  WHERE 1 = 1`;
+        }
+        connection.query(sqlStr, queryParam, (err, results) => {
+            console.log(results)
         })
     }
 }
